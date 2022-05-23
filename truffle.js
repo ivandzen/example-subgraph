@@ -1,6 +1,14 @@
 require('babel-register')
 require('babel-polyfill')
+const Web3 = require("web3");
 const HDWalletProvider = require('truffle-hdwallet-provider')
+
+let privateKeys = [
+  '0xf5c746b15e3bdd6bf8c516031a15de16ea161ce10552635abb27c9bd16e0a04a',
+  '0xf5cc5e36108264bc26e33616287a34eeaab06bffc6890e7db40d53e7821b382a'
+];
+
+const provider = 
 
 module.exports = {
   networks: {
@@ -18,6 +26,16 @@ module.exports = {
       },
       network_id: '3',
     },
+    neonlabs: {
+      provider: () => {
+        return new HDWalletProvider(
+          privateKeys,
+          new Web3.providers.HttpProvider("http://127.0.0.1:9091/solana"),
+          0, 2
+        );
+      },
+      network_id: "*"
+    }
   },
   compilers: {
     solc: {
