@@ -4,7 +4,7 @@ services:
   tracer-db:
     container_name: tracer-db
     hostname: tracer-db
-    image: neonlabsorg/tracer-db:${BUILDKITE_COMMIT:-ci-tracing-api-develop}
+    image: neonlabsorg/tracer-db:ci-eip-1898
     expose:
       - "8123"
       - "9000"
@@ -91,7 +91,7 @@ services:
       
   dbcreation:
     container_name: dbcreation
-    image: neonlabsorg/proxy:latest
+    image: neonlabsorg/proxy:ci-index-confirmed-txs
     environment:
       SOLANA_URL: http://validator:8899
       POSTGRES_DB: neon-db
@@ -107,7 +107,7 @@ services:
         
   indexer:
     container_name: indexer
-    image: neonlabsorg/proxy:latest
+    image: neonlabsorg/proxy:ci-index-confirmed-txs
     environment:
       SOLANA_URL: http://validator:8899
       POSTGRES_DB: neon-db
@@ -130,7 +130,7 @@ services:
   
   proxy:
     container_name: proxy
-    image: neonlabsorg/proxy:latest
+    image: neonlabsorg/proxy:ci-index-confirmed-txs
     environment:
       SOLANA_URL: http://validator:8899
       FAUCET_URL: http://faucet:3333
@@ -175,7 +175,7 @@ services:
 
   deploy_contracts:
     container_name: deploy_contracts
-    image: neonlabsorg/evm_loader:${NEON_EVM_COMMIT:-latest}
+    image: neonlabsorg/evm_loader:latest
     environment:
       - SOLANA_URL=http://validator:8899
       - SPL_TOKEN_AUTHORITY=/opt/contracts/ci-tokens/owner-keypair.json
@@ -199,7 +199,8 @@ services:
       TRACER_DB_NAME: tracer_api_db
       TRACER_DB_USER: validator_user
       TRACER_DB_PASSWORD: qwerty
-    image: neonlabsorg/neon-tracer:${BUILDKITE_COMMIT:-ci-eip-1898}
+      WEB3_PROXY: http://proxy:9090/solana
+    image: neonlabsorg/neon-tracer:ci-eip-1898
     depends_on:
       tracer-db:
         condition: service_healthy
@@ -253,7 +254,7 @@ services:
   neon-rpc:
     container_name: neon-rpc
     hostname: neon-rpc
-    image: neonlabsorg/neon-rpc:${BUILDKITE_COMMIT:-ci-eip-1898}
+    image: neonlabsorg/neon-rpc:ci-eip-1898
     ports:
       - 127.0.0.1:9090:9090
     expose:
@@ -264,19 +265,6 @@ services:
       proxy:
         condition: service_healthy
       neon-tracer:
-        condition: service_started
-  
-  neon-tracer-test:
-    container_name: neon-tracer-test
-    hostname: neon-tracer-test
-    image: neonlabsorg/neon-tracer-test:${BUILDKITE_COMMIT:-ci-tracing-api-develop}
-    networks:
-      - net
-    depends_on:
-      faucet:
-        #condition: service_healthy TODO: Use this after updating faucet image
-        condition: service_started
-      neon-rpc:
         condition: service_started
         
   graph-node:
